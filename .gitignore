@@ -1,0 +1,15 @@
+# Fichiers temporaires Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Fichiers de configuration Spyder
+.spyproject/
+
+# Fichiers de configuration de l'éditeur (VS Code, PyCharm...)
+.vscode/
+.idea/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
