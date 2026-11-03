@@ -1,21 +1,20 @@
 from Echiquier import Echiquier
 
 if __name__ == "__main__":
-    print("--- 1. Affichage du plateau de départ ---")
+    # On crée l'échiquier
     plateau = Echiquier()
+    
+    # On affiche le plateau de départ
+    print("--- Plateau de départ ---")
     plateau.afficher_plateau()
 
-    print("\n--- 2. On tente de déplacer le Pion blanc de e2 vers e4 ---")
-    # Sur notre échiquier, e2 c'est la ligne 6, colonne 4. e4 c'est la ligne 4, colonne 4.
-    case_depart = plateau.cases[6, 4]
-    case_arrivee = plateau.cases[4, 4]
-    
-    succes = plateau.deplacer_piece(case_depart, case_arrivee)
-    
-    if succes:
-        print("✅ Déplacement réussi !")
-    else:
-        print("❌ Déplacement refusé.")
+    # On fait nos tests
+    print("--- Tests de la Dame ---")
+    print("1. Pion devant la Dame (déplacement) :", plateau.deplacer_piece(plateau.cases[6, 3], plateau.cases[4, 3]))
+    print("2. Dame en ligne :", plateau.deplacer_piece(plateau.cases[7, 3], plateau.cases[5, 3]))
+    print("3. Dame en diagonale :", plateau.deplacer_piece(plateau.cases[5, 3], plateau.cases[3, 5]))
+    print("4. Dame en L :", plateau.deplacer_piece(plateau.cases[3, 5], plateau.cases[1, 4]))
 
-    print("\n--- 3. Affichage du plateau après le déplacement ---")
+    # On affiche le résultat final
+    print("--- Plateau après les tests ---")
     plateau.afficher_plateau()

@@ -16,17 +16,24 @@ class Dame(Piece):
         
     def se_Deplacer(self, case_cible: "Case") -> bool:
         """
-        Vérifie si la dame peut se déplacer.
-
+        Vérifie si la Dame peut se déplacer (en ligne droite ou en diagonale).
+        
         Parameters
         ----------
         case_cible : Case
-            Correspond à la case que le joueur a cliqué.
-
-        Returns
-        -------
-        bool
-            Est-ce que la dame peut se déplacer ?
-        """
+            La case sur laquelle on veut déplacer la pièce.
+            """
+        depart = self.position
         
-        pass
+        diff_ligne = case_cible.ligne - depart.ligne
+        diff_colonne = case_cible.colonne - depart.colonne
+        
+        # On refuse le sur place
+        if diff_ligne == 0 and diff_colonne == 0:
+            return False
+            
+        # Mouvement en ligne droite OU en diagonale
+        if diff_ligne == 0 or diff_colonne == 0 or abs(diff_ligne) == abs(diff_colonne):
+            return True
+            
+        return False

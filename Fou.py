@@ -16,17 +16,19 @@ class Fou(Piece):
         
     def se_Deplacer(self, case_cible: "Case") -> bool:
         """
-        Vérifie si le fou peut se déplacer.
-
-        Parameters
-        ----------
-        case_cible : Case
-            Correspond à la case que le joueur a cliqué.
-
-        Returns
-        -------
-        bool
-            Est-ce que le fou peut se déplacer ?
+        Vérifie si le Fou peut se déplacer (en diagonale).
         """
+        depart = self.position
         
-        pass
+        diff_ligne = case_cible.ligne - depart.ligne
+        diff_colonne = case_cible.colonne - depart.colonne
+        
+        # On refuse le sur place
+        if diff_ligne == 0 and diff_colonne == 0:
+            return False
+            
+        # Mouvement diagonal (distance absolue identique sur les deux axes)
+        if abs(diff_ligne) == abs(diff_colonne):
+            return True
+            
+        return False

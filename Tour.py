@@ -21,17 +21,21 @@ class Tour(Piece):
         
     def se_Deplacer(self, case_cible: "Case") -> bool:
         """
-        Vérifie si la Tour peut se déplacer.
-
-        Parameters
-        ----------
-        case_cible : Case
-            Correspond à la case que le joueur a cliqué.
-
-        Returns
-        -------
-        bool
-            Est-ce que la tour peut se déplacer ?
+        Vérifie si la Tour peut se déplacer (en ligne droite).
         """
+        depart = self.position
+        
+        diff_ligne = case_cible.ligne - depart.ligne
+        diff_colonne = case_cible.colonne - depart.colonne
+        
+        # On refuse le sur place
+        if diff_ligne == 0 and diff_colonne == 0:
+            return False
+            
+        # Mouvement horizontal (même ligne) ou vertical (même colonne)
+        if diff_ligne == 0 or diff_colonne == 0:
+            return True
+            
+        return False
         
         
