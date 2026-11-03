@@ -106,12 +106,18 @@ class Echiquier:
         if piece_arrivee is not None and piece_arrivee.couleur == piece_depart.couleur:
             return False
         
-        #Vérifier si la géométrie du déplacement de la pièce est autorisé
+        # Vérifier si la géométrie du déplacement de la pièce est autorisé
         if piece_depart.se_Deplacer(arrivee) == False:
             return False
             
-        #Les conditions sont passées, on peut effectuer le déplacement
-        arrivee.piece = depart.piece
+        # --- Vérification des collisions ---
+        # Le Cavalier est la seule pièce qui peut sauter par-dessus les autres
+        if piece_depart.__class__.__name__ != "Cavalier":
+            if not self.chemin_est_libre(depart, arrivee):
+                return False
+
+        # Les conditions sont passées, on peut effectuer le déplacement
+        arrivee.piece = piece_depart
         depart.piece = None
         piece_depart.position = arrivee
         
@@ -149,3 +155,27 @@ class Echiquier:
                     
             print() # Retour à la ligne
         print()
+
+    def chemin_est_libre(self, depart: Case, arrivee: Case) -> bool:
+        """
+        Vérifie qu'il n'y a pas de pièce sur le chemin entre le départ et l'arrivée.
+        """
+        # On calcule le sens du déplacement (1 si on avance, -1 si on recule, 0 si on reste sur la ligne/colonne)
+        pas_ligne = (arrivee.ligne > depart.ligne) - (arrivee.ligne < depart.ligne)
+        pas_colonne = (arrivee.colonne > depart.colonne) - (arrivee.colonne < depart.colonne)
+        
+        # On se place sur la toute première case après le départ
+        ligne_actuelle = depart.ligne + pas_ligne
+        colonne_actuelle = depart.colonne + pas_colonne
+        
+        # On avance case par case jusqu'à arriver juste avant la destination
+        while (ligne_actuelle != arrivee.ligne) or (colonne_actuelle != arrivee.colonne):
+            # Si on trouve une pièce sur notre route, le chemin est bloqué
+            if not self.cases[ligne_actuelle, colonne_actuelle].est_vide():
+                return False 
+            
+            # Sinon, on avance d'une case dans la même direction
+            ligne_actuelle += pas_ligne
+            colonne_actuelle += pas_colonne
+            
+        return True
