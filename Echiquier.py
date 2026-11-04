@@ -318,3 +318,44 @@ class Echiquier:
                             return True
                             
         return False
+
+    def a_des_coups_legaux(self, couleur: str) -> bool:
+        """
+        Vérifie si le joueur a au moins un coup légal possible.
+        """
+        for ligne in range(8):
+            for colonne in range(8):
+                piece = self.cases[ligne, colonne].piece
+                
+                if piece is not None and piece.couleur == couleur:
+                    for l_dest in range(8):
+                        for c_dest in range(8):
+                            depart = self.cases[ligne, colonne]
+                            arrivee = self.cases[l_dest, c_dest]
+                            
+                            # On teste le déplacement (qui gère déjà l'échec)
+                            if self.deplacer_piece(depart, arrivee):
+                                
+                                # Si le coup est valide, on annule le déplacement 
+                                # pour ne pas modifier le vrai plateau pendant la simulation.
+                                piece_mangee = arrivee.piece
+                                arrivee.piece = depart.piece
+                                depart.piece = piece_mangee
+                                
+                                if piece_mangee is not None:
+                                    piece_mangee.position = arrivee
+                                piece.position = depart
+                                
+                                return True # Un coup valide existe, le roi peut être sauvé
+        return False
+
+    def est_echec_et_mat(self, couleur: str) -> bool:
+        """
+        Vérifie si le joueur est échec et mat (en échec ET aucun coup légal).
+        """
+        # Si le Roi n'est pas en échec, ce n'est pas un mat
+        if not self.est_en_echec(couleur):
+            return False
+            
+        # Si le Roi est en échec, on regarde s'il a un moyen de s'en sortir
+        return not self.a_des_coups_legaux(couleur)

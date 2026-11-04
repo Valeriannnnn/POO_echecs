@@ -1,27 +1,27 @@
 from Echiquier import Echiquier
-from Fou import Fou
-from Cavalier import Cavalier
 
 if __name__ == "__main__":
-    print("=== TEST DU CLOUAGE (Coup suicidaire) ===\n")
+    print("=== TEST DU MAT DU BERGER ===\n")
     plateau = Echiquier()
     
-    # On nettoie la colonne e (fichier e) pour l'exemple
-    # On met un Fou noir en e8 (0,4)
-    plateau.cases[0, 4].piece = Fou("noir", "Fou_noir.png", plateau.cases[0, 4])
+    # 1. e4 (blanc) / e5 (noir)
+    plateau.deplacer_piece(plateau.cases[6, 4], plateau.cases[4, 4])
+    plateau.deplacer_piece(plateau.cases[1, 4], plateau.cases[3, 4])
     
-    # On met un Cavalier blanc en e4 (4,4)
-    plateau.cases[4, 4].piece = Cavalier("blanc", "Cavalier_blanc.png", plateau.cases[4, 4])
+    # 2. Fc4 (blanc) / Cc6 (noir)
+    # Le Fou va en (4,2) pour protéger la Dame plus tard
+    plateau.deplacer_piece(plateau.cases[7, 5], plateau.cases[4, 2])
+    plateau.deplacer_piece(plateau.cases[0, 1], plateau.cases[2, 2])
     
-    # On enlève les pièces entre le Roi blanc (e1) et le Cavalier (e4)
-    plateau.cases[5, 4].piece = None
-    plateau.cases[6, 4].piece = None
+    # 3. Dh5 (blanc) / Cf6 (noir, l'erreur fatale)
+    plateau.deplacer_piece(plateau.cases[7, 3], plateau.cases[3, 7])
+    plateau.deplacer_piece(plateau.cases[0, 6], plateau.cases[2, 5])
     
-    # Vérifions l'état
-    print("Le Roi blanc est en échec ?", plateau.est_en_echec("blanc")) # False, le Cavalier bloque
+    # 4. Dxf7# (La Dame blanche mange en f7)
+    succes = plateau.deplacer_piece(plateau.cases[3, 7], plateau.cases[1, 5])
+    print("Coup final joué :", succes)
     
-    print("\nLe Cavalier blanc essaie de bouger (vers d2). C'est illégal car il expose son Roi !")
-    succes = plateau.deplacer_piece(plateau.cases[4, 4], plateau.cases[6, 3]) # Le cavalier va en d2
-    print("Résultat attendu : False | Obtenu :", succes)
-    
-    print("\nLe Cavalier est-il resté en e4 ?", plateau.cases[4, 4].piece) # True, il n'a pas pu bouger
+    print("\n--- Analyse de la position ---")
+    print("Le Roi noir est en échec ?", plateau.est_en_echec("noir")) 
+    print("Le Roi noir a des coups légaux ?", plateau.a_des_coups_legaux("noir")) 
+    print("EST-CE ÉCHEC ET MAT ?", plateau.est_echec_et_mat("noir")) 
