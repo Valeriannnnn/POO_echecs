@@ -83,7 +83,6 @@ class Echiquier:
 
 
     def deplacer_piece(self, depart: Case, arrivee: Case) -> bool:
-        """Déplace une pièce de la case de départ vers la case d'arrivée."""
         # 1. Vérifier que la case de départ n'est pas vide
         if depart.est_vide():
             return False
@@ -95,33 +94,51 @@ class Echiquier:
         if piece_arrivee is not None and piece_arrivee.couleur == piece_depart.couleur:
             return False
             
-        # 3. --- DÉTECTION DU ROQUE (DOIT ÊTRE AVANT se_Deplacer) ---
+        # 3. --- DÉTECTION DU ROQUE ---
         if piece_depart.__class__.__name__ == "Roi" and abs(arrivee.colonne - depart.colonne) == 2:
             if arrivee.colonne > depart.colonne:
                 return self.effectuer_petit_roque(piece_depart.couleur)
             else:
                 return self.effectuer_grand_roque(piece_depart.couleur)
-        # -------------------------------------------------------------
             
-        # 4. Vérifier si la géométrie du déplacement de la pièce est autorisée
+        # 4. Vérifier la géométrie de la pièce
         if not piece_depart.se_Deplacer(arrivee):
             return False
             
-        # 5. Vérification des collisions (sauf pour le Cavalier)
+        # 5. Vérifier les collisions
         if piece_depart.__class__.__name__ != "Cavalier":
             if not self.chemin_est_libre(depart, arrivee):
                 return False
+        
+        
+        # 6. Simuler le déplacement pour vérifier si le Roi est en échec après le coup
+        # On sauvegarde l'état de la case d'arrivée (au cas où on capture)
+        piece_mangee = arrivee.piece
+        
+        # On simule le déplacement
+        arrivee.piece = piece_depart
+        depart.piece = None
+        
+        # On vérifie si notre Roi est en échec après ce mouvement
+        est_illegal = self.est_en_echec(piece_depart.couleur)
+        
+        # On annule le déplacement (retour en arrière)
+        depart.piece = piece_depart
+        arrivee.piece = piece_mangee
+        
+        if est_illegal:
+            return False # Le coup est refusé
+        
             
-        # 6. Les conditions sont passées, on effectue le déplacement
+        # 7. Les conditions sont TOUTES passées, on effectue le vrai déplacement
         arrivee.piece = piece_depart
         depart.piece = None
         piece_depart.position = arrivee
-
-        # Vérifie si le pion qui vient de bouger est arrivé au bout du plateau.
-        # Si c'est le cas, il est automatiquement remplacé par une Dame.
+        
+        # 8. Vérification de la promotion
         self.promouvoir_pion(arrivee)
         
-        # 7. Mise à jour de l'attribut "a_deja_bouger"
+        # 9. Mise à jour de a_deja_bouger
         if hasattr(piece_depart, 'a_deja_bouger'):
             piece_depart.a_deja_bouger = True
         
@@ -259,4 +276,45 @@ class Echiquier:
             case.piece = Dame(piece.couleur, "Dame.png", case)
             return True
             
+        return False
+
+    def est_en_echec(self, couleur: str) -> bool:
+        """
+        Vérifie si le Roi de la couleur donnée est actuellement attaqué.
+        """
+        # Trouver la case du Roi
+        case_roi = None
+        for ligne in range(8):
+            for colonne in range(8):
+                piece = self.cases[ligne, colonne].piece
+                if (piece is not None and 
+                    piece.__class__.__name__ == "Roi" and 
+                    piece.couleur == couleur):
+                    case_roi = self.cases[ligne, colonne]
+                    break
+            if case_roi is not None:
+                break
+                
+        if case_roi is None:
+            return False # Sécurité (au cas où le Roi n'est pas sur le plateau)
+
+        # Regarder toutes les pièces adverses
+        couleur_adverse = "noir" if couleur == "blanc" else "blanc"
+        
+        for ligne in range(8):
+            for colonne in range(8):
+                piece = self.cases[ligne, colonne].piece
+                
+                # Si c'est une pièce adverse
+                if piece is not None and piece.couleur == couleur_adverse:
+                    
+                    # Est-ce que sa géométrie lui permet d'atteindre le Roi ?
+                    if piece.se_Deplacer(case_roi):
+                        
+                        # Est-ce que le chemin est libre ? (sauf pour le Cavalier)
+                        if piece.__class__.__name__ == "Cavalier":
+                            return True
+                        elif self.chemin_est_libre(self.cases[ligne, colonne], case_roi):
+                            return True
+                            
         return False

@@ -1,40 +1,27 @@
 from Echiquier import Echiquier
-from Pion import Pion
+from Fou import Fou
+from Cavalier import Cavalier
 
 if __name__ == "__main__":
-    print("=== TEST DE LA PROMOTION ===\n")
+    print("=== TEST DU CLOUAGE (Coup suicidaire) ===\n")
     plateau = Echiquier()
-
-    # ---------------------------------------------------------
-    print("--- Test 1 : Promotion d'un Pion BLANC ---")
-    # On prépare la case (0,0) : on retire la Tour noire qui s'y trouve
-    plateau.cases[0, 0].piece = None 
-    # On place un Pion blanc en (1,0)
-    plateau.cases[1, 0].piece = Pion("blanc", "Pion_blanc.png", plateau.cases[1, 0])
     
-    print("Avant déplacement, case (1,0) :", plateau.cases[1, 0].piece)
-    print("Avant déplacement, case (0,0) :", plateau.cases[0, 0].piece)
-
-    # Le pion blanc avance en (0,0)
-    plateau.deplacer_piece(plateau.cases[1, 0], plateau.cases[0, 0])
+    # On nettoie la colonne e (fichier e) pour l'exemple
+    # On met un Fou noir en e8 (0,4)
+    plateau.cases[0, 4].piece = Fou("noir", "Fou_noir.png", plateau.cases[0, 4])
     
-    print("\nAprès déplacement :")
-    print("Case (1,0) :", plateau.cases[1, 0].piece) # Devrait être None
-    print("Case (0,0) :", plateau.cases[0, 0].piece) # Devrait être une Dame !
-    print()
-
-    # ---------------------------------------------------------
-    print("--- Test 2 : Promotion d'un Pion NOIR ---")
-    # On prépare la case (7,0) : on retire la Tour blanche
-    plateau.cases[7, 0].piece = None 
-    # On place un Pion noir en (6,0)
-    plateau.cases[6, 0].piece = Pion("noir", "Pion_noir.png", plateau.cases[6, 0])
+    # On met un Cavalier blanc en e4 (4,4)
+    plateau.cases[4, 4].piece = Cavalier("blanc", "Cavalier_blanc.png", plateau.cases[4, 4])
     
-    print("Avant déplacement, case (6,0) :", plateau.cases[6, 0].piece)
+    # On enlève les pièces entre le Roi blanc (e1) et le Cavalier (e4)
+    plateau.cases[5, 4].piece = None
+    plateau.cases[6, 4].piece = None
     
-    # Le pion noir avance en (7,0)
-    plateau.deplacer_piece(plateau.cases[6, 0], plateau.cases[7, 0])
+    # Vérifions l'état
+    print("Le Roi blanc est en échec ?", plateau.est_en_echec("blanc")) # False, le Cavalier bloque
     
-    print("\nAprès déplacement :")
-    print("Case (6,0) :", plateau.cases[6, 0].piece) # Devrait être None
-    print("Case (7,0) :", plateau.cases[7, 0].piece) # Devrait être une Dame !
+    print("\nLe Cavalier blanc essaie de bouger (vers d2). C'est illégal car il expose son Roi !")
+    succes = plateau.deplacer_piece(plateau.cases[4, 4], plateau.cases[6, 3]) # Le cavalier va en d2
+    print("Résultat attendu : False | Obtenu :", succes)
+    
+    print("\nLe Cavalier est-il resté en e4 ?", plateau.cases[4, 4].piece) # True, il n'a pas pu bouger
