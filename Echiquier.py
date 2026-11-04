@@ -116,6 +116,10 @@ class Echiquier:
         arrivee.piece = piece_depart
         depart.piece = None
         piece_depart.position = arrivee
+
+        # Vérifie si le pion qui vient de bouger est arrivé au bout du plateau.
+        # Si c'est le cas, il est automatiquement remplacé par une Dame.
+        self.promouvoir_pion(arrivee)
         
         # 7. Mise à jour de l'attribut "a_deja_bouger"
         if hasattr(piece_depart, 'a_deja_bouger'):
@@ -235,3 +239,24 @@ class Echiquier:
         tour.a_deja_bouger = True
 
         return True
+
+    def promouvoir_pion(self, case: Case) -> bool:
+        """
+        Transforme un pion arrivé au bout du plateau en Dame.
+        Retourne True si une promotion a eu lieu, False sinon.
+        """
+        piece = case.piece
+        
+        # On vérifie que c'est bien un pion
+        if piece is None or piece.__class__.__name__ != "Pion":
+            return False
+            
+        ligne_promotion = 0 if piece.couleur == "blanc" else 7
+        
+        # On vérifie que le pion est sur la dernière ligne
+        if case.ligne == ligne_promotion:
+            # On remplace le pion par une Dame de la même couleur
+            case.piece = Dame(piece.couleur, "Dame.png", case)
+            return True
+            
+        return False
