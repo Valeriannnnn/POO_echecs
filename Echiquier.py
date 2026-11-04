@@ -27,6 +27,7 @@ class Echiquier:
     #Attributs
     cases: np.ndarray
     case_en_passant: "Case"
+
     
     def __init__(self):
         #On crée la grille 8*8
@@ -42,6 +43,7 @@ class Echiquier:
         
         # 3. On place les pièces au démarrage
         self.initialiser_plateau()
+
        
     def initialiser_plateau(self) -> None:
         """
@@ -79,53 +81,48 @@ class Echiquier:
         for c in range(8):
             self.cases[6,c].piece = Pion("blanc", "Pion_blanc.png", self.cases[6,c])
 
+
     def deplacer_piece(self, depart: Case, arrivee: Case) -> bool:
-        """
-        Permet de déplacer une pièce.
-
-        Parameters
-        ----------
-        depart : Case
-            La case où se trouve la pièce.
-        arrivee : Case
-            La case où le joueur veut aller.
-
-        Returns
-        -------
-        bool: True si le déplacement a réussi, False sinon.
-        """
-        #Vérifier que la case de départ n'est pas vide
-        
-        if depart.est_vide() == True:
+        """Déplace une pièce de la case de départ vers la case d'arrivée."""
+        # 1. Vérifier que la case de départ n'est pas vide
+        if depart.est_vide():
             return False
                 
         piece_depart = depart.piece
         piece_arrivee = arrivee.piece
         
-        #Vérifier que la piece d'arrivee n'est pas de la même couleur car on ne peut pas prendre une pièce de notre propre couleur
+        # 2. Vérifier qu'on ne mange pas sa propre pièce
         if piece_arrivee is not None and piece_arrivee.couleur == piece_depart.couleur:
             return False
-        
-        # Vérifier si la géométrie du déplacement de la pièce est autorisé
-        if piece_depart.se_Deplacer(arrivee) == False:
+            
+        # 3. --- DÉTECTION DU ROQUE (DOIT ÊTRE AVANT se_Deplacer) ---
+        if piece_depart.__class__.__name__ == "Roi" and abs(arrivee.colonne - depart.colonne) == 2:
+            if arrivee.colonne > depart.colonne:
+                return self.effectuer_petit_roque(piece_depart.couleur)
+            else:
+                return self.effectuer_grand_roque(piece_depart.couleur)
+        # -------------------------------------------------------------
+            
+        # 4. Vérifier si la géométrie du déplacement de la pièce est autorisée
+        if not piece_depart.se_Deplacer(arrivee):
             return False
             
-        # --- Vérification des collisions ---
-        # Le Cavalier est la seule pièce qui peut sauter par-dessus les autres
+        # 5. Vérification des collisions (sauf pour le Cavalier)
         if piece_depart.__class__.__name__ != "Cavalier":
             if not self.chemin_est_libre(depart, arrivee):
                 return False
-
-        # Les conditions sont passées, on peut effectuer le déplacement
+            
+        # 6. Les conditions sont passées, on effectue le déplacement
         arrivee.piece = piece_depart
         depart.piece = None
         piece_depart.position = arrivee
         
-        # Si la pièce a un attribut a_deja_bouger (Pion, Roi, Tour), on le passe à True
+        # 7. Mise à jour de l'attribut "a_deja_bouger"
         if hasattr(piece_depart, 'a_deja_bouger'):
-           piece_depart.a_deja_bouger = True
+            piece_depart.a_deja_bouger = True
         
         return True
+
     
     def afficher_plateau(self) -> None:
         """Affiche l'échiquier dans la console."""
@@ -156,6 +153,7 @@ class Echiquier:
             print() # Retour à la ligne
         print()
 
+
     def chemin_est_libre(self, depart: Case, arrivee: Case) -> bool:
         """
         Vérifie qu'il n'y a pas de pièce sur le chemin entre le départ et l'arrivée.
@@ -178,4 +176,62 @@ class Echiquier:
             ligne_actuelle += pas_ligne
             colonne_actuelle += pas_colonne
             
+        return True
+
+
+    def effectuer_petit_roque(self, couleur: str) -> bool:
+        """Gère le petit roque (côté Roi)."""
+        ligne = 7 if couleur == "blanc" else 0
+        roi = self.cases[ligne, 4].piece
+        tour = self.cases[ligne, 7].piece
+
+        # Vérifications de base (les pièces sont-elles là ? ont-elles bougé ?)
+        if roi is None or tour is None: return False
+        if roi.a_deja_bouger or tour.a_deja_bouger: return False
+
+        # Vérifier que le chemin est libre (entre la colonne 4 et 7)
+        if not self.chemin_est_libre(self.cases[ligne, 4], self.cases[ligne, 7]):
+            return False
+
+        # Déplacement du Roi (de e1 à g1)
+        self.cases[ligne, 6].piece = roi
+        self.cases[ligne, 4].piece = None
+        roi.position = self.cases[ligne, 6]
+        roi.a_deja_bouger = True
+
+        # Déplacement de la Tour (de h1 à f1)
+        self.cases[ligne, 5].piece = tour
+        self.cases[ligne, 7].piece = None
+        tour.position = self.cases[ligne, 5]
+        tour.a_deja_bouger = True
+
+        return True
+
+
+    def effectuer_grand_roque(self, couleur: str) -> bool:
+        """Gère le grand roque (côté Dame)."""
+        ligne = 7 if couleur == "blanc" else 0
+        roi = self.cases[ligne, 4].piece
+        tour = self.cases[ligne, 0].piece
+
+        # Vérifications de base
+        if roi is None or tour is None: return False
+        if roi.a_deja_bouger or tour.a_deja_bouger: return False
+
+        # érifier que le chemin est libre (entre la colonne 4 et 0)
+        if not self.chemin_est_libre(self.cases[ligne, 4], self.cases[ligne, 0]):
+            return False
+
+        # Déplacement du Roi (de e1 à c1)
+        self.cases[ligne, 2].piece = roi
+        self.cases[ligne, 4].piece = None
+        roi.position = self.cases[ligne, 2]
+        roi.a_deja_bouger = True
+
+        # Déplacement de la Tour (de a1 à d1)
+        self.cases[ligne, 3].piece = tour
+        self.cases[ligne, 0].piece = None
+        tour.position = self.cases[ligne, 3]
+        tour.a_deja_bouger = True
+
         return True
