@@ -1,77 +1,71 @@
 from Echiquier import Echiquier
-from Joueur import Joueur
 
 class Partie:
-    def __init__(self, joueur1: Joueur, joueur2: Joueur):
-        self.joueur1 = joueur1
-        self.joueur2 = joueur2
-        self.tour_actuel = joueur1
+    def __init__(self):
         self.echiquier = Echiquier()
+        self.tour_actuel = "blanc"
+        self.etat = "en_cours" 
 
     def changer_tour(self):
-        """Passe le tour au joueur suivant."""
-        if self.tour_actuel == self.joueur1:
-            self.tour_actuel = self.joueur2
-        else:
-            self.tour_actuel = self.joueur1
+        self.tour_actuel = "noir" if self.tour_actuel == "blanc" else "blanc"
 
+    def jouer_coup(self, depart, arrivee) -> bool:
+        succes = self.echiquier.deplacer_piece(depart, arrivee)
+        if succes:
+            self.changer_tour()
+            self.verifier_fin_de_partie()
+        return succes
+
+    def verifier_fin_de_partie(self):
+        if self.echiquier.est_echec_et_mat(self.tour_actuel):
+            self.etat = f"victoire_{'noir' if self.tour_actuel == 'blanc' else 'blanc'}"
+        elif not self.echiquier.a_des_coups_legaux(self.tour_actuel):
+            self.etat = "match_nul"
+
+    def abandonner_la_partie(self):
+        self.etat = f"victoire_{'noir' if self.tour_actuel == 'blanc' else 'blanc'}"
+
+    # ==========================================
+    # PARTIE TERMINAL (Console)
+    # ==========================================
     def convertir_coordonnees(self, texte: str) -> tuple:
-        """
-        Transforme une saisie comme 'e2' en coordonnées (ligne, colonne).
-        Retourne (None, None) si l'entrée est invalide.
-        """
         texte = texte.strip().lower()
-        
-        # On vérifie la longueur (2 caractères)
-        if len(texte) != 2:
-            return None, None
-            
-        # On vérifie que la 1ère lettre est entre 'a' et 'h'
-        # et que le 2ème caractère est un chiffre entre '1' et '8'
-        if texte[0] not in "abcdefgh" or texte[1] not in "12345678":
-            return None, None
-            
-        # Si tout est bon, on calcule
-        colonne = ord(texte[0]) - ord('a')
-        ligne = 8 - int(texte[1])
-        
-        return ligne, colonne
+        if len(texte) != 2: return None, None
+        if texte[0] not in "abcdefgh" or texte[1] not in "12345678": return None, None
+        return 8 - int(texte[1]), ord(texte[0]) - ord('a')
 
-    def demarrer(self):
-        """Lance la boucle principale du jeu."""
-        en_cours = True
-        print("Bienvenue aux échecs ! Tapez 'quitter' pour arrêter.\n")
+    def demarrer_en_terminal(self):
+        print("Bienvenue aux échecs (Mode Terminal) ! Tapez 'quitter' pour arrêter.\n")
         
-        while en_cours:
-            # 1. Affichage du plateau
+        while self.etat == "en_cours":
             self.echiquier.afficher_plateau()
-            print(f"Au tour de {self.tour_actuel.name} ({self.tour_actuel.color})")
+            print(f"Au tour des {'Blancs' if self.tour_actuel == 'blanc' else 'Noirs'}")
             
-            # 2. Saisie utilisateur
-            case_depart_str = input("Case de départ (ex: e2) ou 'quitter' : ")
-            if case_depart_str.lower() == 'quitter':
-                print("Partie terminée.")
+            dep_str = input("Case de départ (ex: e2) ou 'quitter' : ")
+            if dep_str.lower() == 'quitter':
                 break
                 
-            case_arrivee_str = input("Case d'arrivée (ex: e4) : ")
+            arr_str = input("Case d'arrivée (ex: e4) : ")
             
-            # 3. Conversion et vérification
-            ligne_dep, col_dep = self.convertir_coordonnees(case_depart_str)
-            ligne_arr, col_arr = self.convertir_coordonnees(case_arrivee_str)
+            l_dep, c_dep = self.convertir_coordonnees(dep_str)
+            l_arr, c_arr = self.convertir_coordonnees(arr_str)
             
-            # Si la fonction a renvoyé None, c'est que le format était mauvais
-            if ligne_dep is None or ligne_arr is None:
-                print("\n❌ Format invalide. Utilisez une lettre (a-h) et un chiffre (1-8).\n")
+            if l_dep is None or l_arr is None:
+                print("Format invalide. Réessayez.\n")
                 continue
                 
-            # 4. Tentative de déplacement
-            case_depart = self.echiquier.cases[ligne_dep, col_dep]
-            case_arrivee = self.echiquier.cases[ligne_arr, col_arr]
+            depart = self.echiquier.cases[l_dep, c_dep]
+            arrivee = self.echiquier.cases[l_arr, c_arr]
             
-            succes = self.echiquier.deplacer_piece(case_depart, case_arrivee)
-            
-            # 5. Résultat
-            if succes:
-                self.changer_tour()
+            if self.jouer_coup(depart, arrivee):
+                if self.etat == "victoire_blanc":
+                    self.echiquier.afficher_plateau()
+                    print("ÉCHEC ET MAT ! Les Blancs ont gagné !")
+                elif self.etat == "victoire_noir":
+                    self.echiquier.afficher_plateau()
+                    print("ÉCHEC ET MAT ! Les Noirs ont gagné !")
+                elif self.etat == "match_nul":
+                    self.echiquier.afficher_plateau()
+                    print("PAT ! Match nul.")
             else:
-                print("\n❌ Déplacement invalide ! Réessayez.\n")
+                print("Déplacement invalide !\n")
