@@ -13,9 +13,9 @@ class Pion(Piece):
     a_deja_bouger: bool
     
     
-    def __init__(self, couleur: str, cheminImage: str, position: "Case"= None):
+    def __init__(self, couleur: str, position: "Case"= None):
         #On appelle le constructeur de Piece (super)
-        super().__init__(couleur, cheminImage, position)
+        super().__init__(couleur, position)
         
         #On initialise l'attribut spécifique
         self.a_deja_bouger = False
@@ -37,7 +37,8 @@ class Pion(Piece):
         """
         #la pièce connaît déjà sa position actuelle (self.position)
         depart = self.position
-        direction = None
+        #Les blancs montent (vers le haut, donc -1) et les noirs descendent (vers le bas, donc +1)
+        direction = -1 if self.couleur == "blanc" else 1
         
         #calcul de la distance
         diff_ligne = case_cible.ligne - depart.ligne
@@ -45,9 +46,6 @@ class Pion(Piece):
         
         #1.Déplacement tout droit (on ne peut prednre une pièce adversaire qu'en avançant d'une case en diagonale)
         if diff_colonne == 0:
-            #Les blancs montent (vers le haut, donc -1) et les noirs descendent (vers le bas, donc +1)
-            direction = -1 if self.couleur == "blanc" else 1
-        
         #Avance d'une case (seulement si la case est vide)
             if diff_ligne == direction and case_cible.est_vide() == True :
                 return True
@@ -59,7 +57,6 @@ class Pion(Piece):
             
         #2.Déplacement en diagonale pour prendre une pièce adverse
         elif abs(diff_colonne) == 1:
-            direction = -1 if self.couleur == "blanc" else 1
             if diff_ligne == direction:
                 # On vérifie qu'il y a bien une pièce adverse à manger
                 if case_cible.piece is not None and case_cible.piece.couleur != self.couleur:

@@ -32,7 +32,7 @@ class FenetreEchecs(QWidget):
                 btn.clicked.connect(lambda checked, l=ligne, c=colonne: self.clic_case(l, c))
                 self.layout_grille.addWidget(btn, ligne, colonne)
 
-        # --- MODIFIÉ : On ne garde que le bouton Abandonner ---
+        # bouton abandonner
         self.layout_boutons = QHBoxLayout()
         self.layout_principal.addLayout(self.layout_boutons)
 

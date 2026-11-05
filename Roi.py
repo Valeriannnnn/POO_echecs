@@ -11,9 +11,9 @@ class Roi(Piece):
     # Attributs spécifiques au Roi
     a_deja_bouger: bool
     
-    def __init__(self, couleur: str, cheminImage: str, position: "Case"= None):
+    def __init__(self, couleur: str, position: "Case"= None):
         # On appelle le constructeur de Piece (super)
-        super().__init__(couleur, cheminImage, position)
+        super().__init__(couleur, position)
         
         # On initialise l'attribut spécifique
         self.a_deja_bouger = False

@@ -9,9 +9,9 @@ from Piece import Piece
 
 class Fou(Piece):
     
-    def __init__(self, couleur: str, cheminImage: str, position: "Case"= None):
+    def __init__(self, couleur: str, position: "Case"= None):
         #On appelle le constructeur de Piece (super)
-        super().__init__(couleur, cheminImage, position)
+        super().__init__(couleur, position)
         
         
     def se_Deplacer(self, case_cible: "Case") -> bool:

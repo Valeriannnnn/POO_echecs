@@ -5,13 +5,6 @@ Created on Mon Nov  2 15:27:29 2026
 @author: valer
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Nov  2 15:26:27 2026
-
-@author: valer
-"""
-
 from Case import Case
 from Tour import Tour
 from Cavalier import Cavalier
@@ -38,10 +31,8 @@ class Echiquier:
         for c in range(8):
             for l in range(8):
                 self.cases[l,c] = Case(l,c)
-                
-        self.case_en_passant = None
         
-        # 3. On place les pièces au démarrage
+        # On place les pièces au démarrage
         self.initialiser_plateau()
 
        
@@ -55,31 +46,31 @@ class Echiquier:
         """
            
         #Les pièces noires
-        self.cases[0,0].piece = Tour("noir", "Tour_noir.png", self.cases[0,0])
-        self.cases[0,1].piece = Cavalier("noir", "Cavalier_noir.png", self.cases[0,1])
-        self.cases[0,2].piece = Fou("noir", "Fou_noir.png", self.cases[0,2])
-        self.cases[0,3].piece = Dame("noir", "Dame_noir.png", self.cases[0,3])
-        self.cases[0,4].piece = Roi("noir", "Roi_noir.png", self.cases[0,4])
-        self.cases[0,5].piece = Fou("noir", "Fou_noir.png", self.cases[0,5])
-        self.cases[0,6].piece = Cavalier("noir", "Cavalier_noir.png", self.cases[0,6])
-        self.cases[0,7].piece = Tour("noir", "Tour_noir.png", self.cases[0,7])
+        self.cases[0,0].piece = Tour("noir", self.cases[0,0])
+        self.cases[0,1].piece = Cavalier("noir", self.cases[0,1])
+        self.cases[0,2].piece = Fou("noir", self.cases[0,2])
+        self.cases[0,3].piece = Dame("noir", self.cases[0,3])
+        self.cases[0,4].piece = Roi("noir", self.cases[0,4])
+        self.cases[0,5].piece = Fou("noir", self.cases[0,5])
+        self.cases[0,6].piece = Cavalier("noir", self.cases[0,6])
+        self.cases[0,7].piece = Tour("noir", self.cases[0,7])
         
         for c in range(8):
-            self.cases[1,c].piece = Pion("noir", "Pion_noir.png", self.cases[1,c])
+            self.cases[1,c].piece = Pion("noir", self.cases[1,c])
 
 
         #les pièces blanches
-        self.cases[7,0].piece = Tour("blanc", "Tour_blanc.png", self.cases[7,0])
-        self.cases[7,1].piece = Cavalier("blanc", "Cavalier_blanc.png", self.cases[7,1])
-        self.cases[7,2].piece = Fou("blanc", "Fou_blanc.png", self.cases[7,2])
-        self.cases[7,3].piece = Dame("blanc", "Dame_blanc.png", self.cases[7,3])
-        self.cases[7,4].piece = Roi("blanc", "Roi_blanc.png", self.cases[7,4])
-        self.cases[7,5].piece = Fou("blanc", "Fou_blanc.png", self.cases[7,5])
-        self.cases[7,6].piece = Cavalier("blanc", "Cavalier_blanc.png", self.cases[7,6])
-        self.cases[7,7].piece = Tour("blanc", "Tour_blanc.png", self.cases[7,7])
+        self.cases[7,0].piece = Tour("blanc", self.cases[7,0])
+        self.cases[7,1].piece = Cavalier("blanc", self.cases[7,1])
+        self.cases[7,2].piece = Fou("blanc", self.cases[7,2])
+        self.cases[7,3].piece = Dame("blanc", self.cases[7,3])
+        self.cases[7,4].piece = Roi("blanc", self.cases[7,4])
+        self.cases[7,5].piece = Fou("blanc", self.cases[7,5])
+        self.cases[7,6].piece = Cavalier("blanc", self.cases[7,6])
+        self.cases[7,7].piece = Tour("blanc", self.cases[7,7])
         
         for c in range(8):
-            self.cases[6,c].piece = Pion("blanc", "Pion_blanc.png", self.cases[6,c])
+            self.cases[6,c].piece = Pion("blanc", self.cases[6,c])
 
 
     def deplacer_piece(self, depart: Case, arrivee: Case) -> bool:
@@ -273,7 +264,7 @@ class Echiquier:
         # On vérifie que le pion est sur la dernière ligne
         if case.ligne == ligne_promotion:
             # On remplace le pion par une Dame de la même couleur
-            case.piece = Dame(piece.couleur, "Dame.png", case)
+            case.piece = Dame(piece.couleur, case)
             return True
             
         return False
