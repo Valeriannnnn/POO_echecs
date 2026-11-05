@@ -313,7 +313,20 @@ class Echiquier:
     def a_des_coups_legaux(self, couleur: str) -> bool:
         """
         Vérifie si le joueur a au moins un coup légal possible.
+        Le plateau est identique avant et après l'appel.
         """
+        # deplacer_piece joue vraiment le coup (capture, promotion, roque, a_deja_bouger) :
+        # on sauvegarde donc tout le plateau pour pouvoir le remettre exactement en place.
+        sauvegarde = []
+        for ligne in range(8):
+            for colonne in range(8):
+                case = self.cases[ligne, colonne]
+                piece = case.piece
+                if piece is None:
+                    sauvegarde.append((case, None, None, None))
+                else:
+                    sauvegarde.append((case, piece, piece.position, getattr(piece, 'a_deja_bouger', None)))
+
         for ligne in range(8):
             for colonne in range(8):
                 piece = self.cases[ligne, colonne].piece
@@ -327,15 +340,13 @@ class Echiquier:
                             # On teste le déplacement (qui gère déjà l'échec)
                             if self.deplacer_piece(depart, arrivee):
                                 
-                                # Si le coup est valide, on annule le déplacement 
-                                # pour ne pas modifier le vrai plateau pendant la simulation.
-                                piece_mangee = arrivee.piece
-                                arrivee.piece = depart.piece
-                                depart.piece = piece_mangee
-                                
-                                if piece_mangee is not None:
-                                    piece_mangee.position = arrivee
-                                piece.position = depart
+                                # Le coup est valide : on restaure tout le plateau
+                                for case, piece_sauvee, position, a_deja_bouger in sauvegarde:
+                                    case.piece = piece_sauvee
+                                    if piece_sauvee is not None:
+                                        piece_sauvee.position = position
+                                        if hasattr(piece_sauvee, 'a_deja_bouger'):
+                                            piece_sauvee.a_deja_bouger = a_deja_bouger
                                 
                                 return True # Un coup valide existe, le roi peut être sauvé
         return False
