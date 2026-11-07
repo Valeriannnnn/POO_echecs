@@ -1,5 +1,4 @@
-from PyQt5.QtWidgets import (QWidget, QGridLayout, QPushButton, QMessageBox, 
-                             QVBoxLayout, QHBoxLayout)
+from PyQt5.QtWidgets import (QWidget, QGridLayout, QPushButton, QMessageBox, QVBoxLayout, QHBoxLayout)
 from Partie import Partie
 
 Icones_Pieces = {
@@ -10,6 +9,23 @@ Icones_Pieces = {
 }
 
 class FenetreEchecs(QWidget):
+    """
+    Fenêtre PyQt5 du jeu d'échecs.
+
+    Affiche le plateau sous forme d'une grille de 8 x 8 boutons, avec un
+    bouton d'abandon. Le titre de la fenêtre indique à qui c'est le tour.
+
+    Attributes
+    ----------
+    partie : Partie
+        Partie en cours.
+    case_selectionnee : tuple of int or None
+        Ligne et colonne de la case sélectionnée, None si aucune ne l'est.
+    boutons : list of list of QPushButton
+        Boutons du plateau, indexés par [ligne][colonne].
+    """
+
+
     def __init__(self):
         super().__init__()
         self.resize(600, 700)
@@ -43,7 +59,13 @@ class FenetreEchecs(QWidget):
 
         self.mettre_a_jour_affichage()
 
+
     def mettre_a_jour_affichage(self):
+        """
+        Redessine les pièces et les couleurs des cases.
+
+        La surbrillance de la case sélectionnée est effacée.
+        """
         for ligne in range(8):
             for colonne in range(8):
                 piece = self.partie.echiquier.cases[ligne, colonne].piece
@@ -60,7 +82,24 @@ class FenetreEchecs(QWidget):
                 else:
                     btn.setStyleSheet("background-color: #B58863; font-size: 40px;")
 
+
     def clic_case(self, ligne, colonne):
+        """
+        Gère le clic sur une case du plateau.
+
+        Un premier clic sélectionne une pièce du joueur dont c'est le tour.
+        Le clic suivant tente de la déplacer vers la case cliquée. Si le coup
+        est refusé, il sélectionne la pièce cliquée si elle appartient à ce
+        joueur, sinon il annule la sélection. Le clic est ignoré si la partie
+        est terminée.
+
+        Parameters
+        ----------
+        ligne : int
+            Ligne de la case cliquée, de 0 (en haut) à 7.
+        colonne : int
+            Colonne de la case cliquée, de 0 (à gauche) à 7.
+        """
         if self.partie.etat != "en_cours": return 
 
         piece_cliquee = self.partie.echiquier.cases[ligne, colonne].piece
@@ -92,7 +131,9 @@ class FenetreEchecs(QWidget):
                     self.case_selectionnee = None
                     self.mettre_a_jour_affichage()
 
+
     def verifier_fin_de_partie(self):
+        """Annonce le résultat et ferme la fenêtre si la partie est terminée."""
         if self.partie.etat == "victoire_blanc":
             QMessageBox.information(self, "Fin de partie", "ÉCHEC ET MAT !\nLes Blancs ont gagné !")
             self.close()
@@ -103,7 +144,13 @@ class FenetreEchecs(QWidget):
             QMessageBox.information(self, "Fin de partie", "PAT ! Match nul.")
             self.close()
 
+
     def action_abandonner(self):
+        """
+        Fait abandonner le joueur dont c'est le tour, après confirmation.
+
+        Si le joueur confirme, annonce le gagnant et ferme la fenêtre.
+        """
         reponse = QMessageBox.question(self, "Abandon", "Voulez-vous vraiment abandonner ?", 
                                        QMessageBox.Yes | QMessageBox.No)
         if reponse == QMessageBox.Yes:

@@ -1,8 +1,19 @@
 class Case:
-    #Attributs
-    ligne: int
-    colonne: int
-    piece: "Piece" # On met des guillemets pour éviter l'import circulaire
+    """
+    Case de l'échiquier.
+
+    Parameters
+    ----------
+    ligne : int
+        Indice de la ligne, de 0 (en haut) à 7.
+    colonne : int
+        Indice de la colonne, de 0 (à gauche) à 7.
+
+    Attributes
+    ----------
+    piece : Piece or None
+        Pièce posée sur la case, None si la case est vide.
+    """
     
     def __init__(self, ligne:int, colonne: int):
         self.ligne = ligne
@@ -12,14 +23,14 @@ class Case:
             
             
     def est_vide(self) -> bool:
-        
         """
         Vérifie si la case est vide.
-        
-        Returns:
-            bool: True si la case ne contient aucune pièce, False sinon.
-        """
-        
+
+        Returns
+        -------
+        bool
+            True si la case ne contient aucune pièce, False sinon.
+        """ 
         return self.piece is None
     
     
