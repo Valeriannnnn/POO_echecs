@@ -191,19 +191,54 @@ class Echiquier:
         return True
 
 
+    def roque_est_autorise(self, couleur: str, colonne_tour: int, colonnes_roi: tuple) -> bool:
+        """
+        Vérifie toutes les conditions du roque. Le plateau est identique avant et après l'appel.
+        colonnes_roi contient la case de départ du Roi, celle qu'il traverse et celle qu'il atteint.
+        """
+        ligne = 7 if couleur == "blanc" else 0
+        case_roi = self.cases[ligne, 4]
+        case_tour = self.cases[ligne, colonne_tour]
+        roi = case_roi.piece
+        tour = case_tour.piece
+
+        # Il faut le Roi et une Tour de cette couleur : les autres pièces n'ont pas a_deja_bouger
+        if not isinstance(roi, Roi) or roi.couleur != couleur:
+            return False
+        if not isinstance(tour, Tour) or tour.couleur != couleur:
+            return False
+
+        # Ni le Roi ni la Tour ne doivent avoir bougé
+        if roi.a_deja_bouger or tour.a_deja_bouger:
+            return False
+
+        # Le chemin entre le Roi et la Tour doit être libre
+        if not self.chemin_est_libre(case_roi, case_tour):
+            return False
+
+        # Le Roi ne doit être attaqué ni au départ, ni sur son trajet, ni à l'arrivée.
+        # On le pose sur chaque case pour réutiliser est_en_echec, puis on le remet en place.
+        roi_en_securite = True
+        case_roi.piece = None
+        for colonne in colonnes_roi:
+            case = self.cases[ligne, colonne]
+            case.piece = roi
+            if self.est_en_echec(couleur):
+                roi_en_securite = False
+            case.piece = None
+        case_roi.piece = roi
+
+        return roi_en_securite
+
+
     def effectuer_petit_roque(self, couleur: str) -> bool:
         """Gère le petit roque (côté Roi)."""
+        if not self.roque_est_autorise(couleur, 7, (4, 5, 6)):
+            return False
+
         ligne = 7 if couleur == "blanc" else 0
         roi = self.cases[ligne, 4].piece
         tour = self.cases[ligne, 7].piece
-
-        # Vérifications de base (les pièces sont-elles là ? ont-elles bougé ?)
-        if roi is None or tour is None: return False
-        if roi.a_deja_bouger or tour.a_deja_bouger: return False
-
-        # Vérifier que le chemin est libre (entre la colonne 4 et 7)
-        if not self.chemin_est_libre(self.cases[ligne, 4], self.cases[ligne, 7]):
-            return False
 
         # Déplacement du Roi (de e1 à g1)
         self.cases[ligne, 6].piece = roi
@@ -222,17 +257,12 @@ class Echiquier:
 
     def effectuer_grand_roque(self, couleur: str) -> bool:
         """Gère le grand roque (côté Dame)."""
+        if not self.roque_est_autorise(couleur, 0, (4, 3, 2)):
+            return False
+
         ligne = 7 if couleur == "blanc" else 0
         roi = self.cases[ligne, 4].piece
         tour = self.cases[ligne, 0].piece
-
-        # Vérifications de base
-        if roi is None or tour is None: return False
-        if roi.a_deja_bouger or tour.a_deja_bouger: return False
-
-        # érifier que le chemin est libre (entre la colonne 4 et 0)
-        if not self.chemin_est_libre(self.cases[ligne, 4], self.cases[ligne, 0]):
-            return False
 
         # Déplacement du Roi (de e1 à c1)
         self.cases[ligne, 2].piece = roi
